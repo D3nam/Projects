@@ -1,0 +1,170 @@
+<!DOCTYPE HTML>
+<html>
+     <head>
+         <style>
+            #game
+            {
+                border:10px solid rgb(200,0,0);
+            }
+        </style>
+        <script>
+            canvasw=700;canvash=600;
+            function play()
+            {
+                var ctx=document.getElementById('game').getContext('2d');
+                function ball()
+                {
+                    this.score=0;
+                    this.speed=5;
+                    this.r=20;
+                    this.x=Math.floor(Math.random() * 180) + 20;
+                    this.y=Math.floor(Math.random() * 580) + 20;
+                    this.dirx=1;
+                    this.diry=1;
+                    
+                    this.render=function()
+                    {
+                        ctx.clearRect(0,0,700,600);
+                        ctx.beginPath();
+                        
+                        ctx.arc(this.x,this.y,this.r,0,2*Math.PI,false);
+                        ctx.fillStyle="rgba(0,0,200,1)";
+                        ctx.fill();
+                        ctx.closePath();
+                        
+                        this.score++;
+
+                        if (this.x<=canvasw-this.r && this.dirx!=0 || this.x<=this.r)
+                            this.dirx=1;
+                        else 
+                            this.dirx=0;
+
+                        if (this.dirx===1)
+                            this.x+=this.speed;
+                        else
+                            this.x-=this.speed;
+                        
+                        if (this.y<=canvash-this.r && this.diry!=0 || this.y<=this.r)
+                            this.diry=1;
+                        else 
+                            this.diry=0;                        
+
+                        if (this.diry===1)
+                           this.y+=this.speed;
+                        else
+                            this.y-=this.speed;
+                    
+                    }
+                }
+                var Ball=new ball();
+                function thegap()
+                {
+                    this.h=225;this.diry=0;this.z=0;this.hit=0;
+                    this.render=function()
+                    {
+                       
+                        ctx.fillRect(canvasw*0.5,0,30,this.h);
+                        ctx.fillRect(canvasw*0.5,this.h+125,30,600);
+                        ctx.fillStyle="rgba(200,0,0,1)";
+                        ctx.fill();
+                        if(this.diry===1)
+                        {
+                            this.h-=10;
+                        }
+                        else if(this.diry===0)
+                        {
+                            this.h=this.h;
+                        }
+                        else if(this.diry===-1)
+                        {
+                            this.h+=10;
+                        }
+                       
+                    }
+                    this.hit_detection=function()
+                    {
+                        for(x=30;x<=360;x+=10)
+                        {
+                            if(Math.cos(x*0.0174)*20+parseFloat(Ball.x)>=canvasw*0.5 && Math.cos(x*0.0174)*20+parseFloat(Ball.x)<=canvasw*0.5+30 && Math.sin(x*0.0174)*20+parseFloat(Ball.y)>=0 && Math.sin(x*0.0174)*20+parseFloat(Ball.y)<=parseFloat(this.h))
+                            {
+                                this.hit=1;
+                            }  
+                            if(Math.cos(x*0.0174)*20+parseFloat(Ball.x)>=canvasw*0.5 && Math.cos(x*0.0174)*20+parseFloat(Ball.x)<=canvasw*0.5+30 && Math.sin(x*0.0174)*20+parseFloat(Ball.y)>=this.h+125 && Math.sin(x*0.0174)*20+parseFloat(Ball.x)<=600)
+                            {
+                                this.hit=1;
+                            }
+                        }
+                        
+                    }    
+                    this.difficult=function()
+                    {
+                        
+                        if(parseFloat(this.z)===parseFloat(Ball.score)-500)
+                        {
+                                
+                            this.z=Ball.score;
+                            Ball.speed++;
+                        }
+                    }
+                    
+                }
+                var Thegap=new thegap();
+                function animate()
+                {
+                   
+                    Ball.render();
+                    Thegap.render();
+                    Thegap.hit_detection();
+                    Thegap.difficult();
+                    if(Thegap.hit===1)
+                    {
+                        alert("you lose")
+                        clearInterval(run);
+                    }
+                    document.getElementById('score').innerHTML=Ball.score;
+                }
+                var Stop=document.getElementById('stop');
+                Stop.addEventListener('mouseover',function(){Thegap.z=1;});
+                Stop.addEventListener('mouseout',function(){Thegap.z=0;});
+                
+                 function key1(e)
+                {
+                    var unicode=e.keyCode? e.keyCode : e.charCode;
+                    
+                    console.log(Thegap.h+"||"+0+"||"+475);
+                    if(unicode===87)
+                    {
+                     Thegap.diry=1;
+                     if(parseFloat(Thegap.h)<=0)
+                     {
+                         Thegap.diry=0;
+                     }
+                    }
+                    else if(parseFloat(unicode)===83)
+                    {
+                        Thegap.diry=-1;
+                        if(parseFloat(Thegap.h)>=475)
+                        {
+                            Thegap.diry=0;
+                        }
+                    }
+                }
+                function key2(e)
+                {
+                    Thegap.diry=0;
+                }
+                
+                window.addEventListener('keydown',key1);
+                window.addEventListener('keyup',key2);
+                var run=setInterval(animate,30);
+            }
+           
+           window.addEventListener('load',play);
+           
+        </script>
+     </head>
+    <body>
+         <canvas id="game" width="700" height="600"></canvas>
+         <button id="stop">Stop</button>
+         <h1 id="score"></h1>
+    </body>    
